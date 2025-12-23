@@ -7,10 +7,10 @@ export class Character {
         this.parts = {};
 
         // Settings
-        this.speed = 4;
-        this.sprintSpeed = 8;
-        this.turnSpeed = 10;
-        this.jumpForce = 8;
+        this.speed = 8; // Faster
+        this.sprintSpeed = 16; // Much faster
+        this.turnSpeed = 15;
+        this.jumpForce = 12; // Higher jump
 
         // Physics
         this.velocity = new THREE.Vector3();

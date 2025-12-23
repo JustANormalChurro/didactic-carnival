@@ -35,26 +35,30 @@ export class Cutscene {
             wait(1),
 
             // Movement Demo
-            say("I can move freely. Observe.", 3),
-            move(new THREE.Vector3(0, 0, -5), 2),
+            say("I can move freely. Observe.", 2),
+            move(new THREE.Vector3(0, 0, -10), 1), // Sprint away
+            wait(0.2),
+            move(new THREE.Vector3(0, 0, 0), 1), // Sprint back
             wait(0.5),
-            move(new THREE.Vector3(0, 0, 0), 2),
-            wait(1),
+            action('dance', 2), // Show off
+            wait(0.5),
 
             // Box Interaction
-            say("See this box? It is a physics object.", 3),
-            move(new THREE.Vector3(4, 0, 0), 2), // Move near box
-            say("I can interact with it.", 2),
+            say("Physics are fully enabled.", 2),
+            move(new THREE.Vector3(4, 0, 0), 1), // Move near box
+            say("Watch this.", 1.5),
             action('kick', 0.5), // Kick
-            wait(1),
+            wait(2), // Watch it fly
 
             // Jump Demo
-            say("I am also capable of vertical traversal.", 3),
+            say("Vertical traversal is standard.", 2),
             action('jump', 1),
+            wait(0.5),
+            action('jump', 1), // Double jump visual (not mechanic)
             wait(1),
 
             // Controls
-            say("Now, it is your turn.", 2),
+            say("Now, create chaos.", 2),
             say("Use WASD to move.", 3),
             say("SPACE to jump.", 2),
             say("SHIFT to sprint.", 2),

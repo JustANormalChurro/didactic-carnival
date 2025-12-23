@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+
 body {
     margin: 0;
     overflow: hidden;
-    background-color: #f0f0f0; /* White void-ish */
-    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    font-family: 'Montserrat', sans-serif; /* Modern font */
     user-select: none;
 }
 
@@ -21,7 +23,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Let clicks pass through to canvas when possible */
+    pointer-events: none;
     z-index: 10;
     display: flex;
     flex-direction: column;
@@ -35,94 +37,125 @@ body {
 }
 
 #start-screen {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 40px;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 60px;
+    border-radius: 30px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
 }
 
 #start-screen h1 {
-    color: #333;
-    margin-bottom: 30px;
+    color: #222;
+    margin-bottom: 40px;
+    font-weight: 900;
+    font-size: 3rem;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #222, #666);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 button {
-    background: #333;
+    background: #222;
     color: white;
     border: none;
-    padding: 15px 30px;
-    font-size: 1.2rem;
+    padding: 20px 50px;
+    font-size: 1.5rem;
+    font-weight: 700;
     border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 button:hover {
-    background: #555;
-    transform: scale(1.05);
+    background: #000;
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+}
+
+button:active {
+    transform: scale(0.95);
 }
 
 .letterbox {
     position: absolute;
     left: 0;
     width: 100%;
-    height: 0%; /* Start closed */
-    background: black;
-    transition: height 1s ease-in-out;
+    height: 0%;
+    background: #000;
+    transition: height 1s cubic-bezier(0.4, 0.0, 0.2, 1);
     z-index: 20;
 }
 
-#letterbox-top {
-    top: 0;
-}
-
-#letterbox-bottom {
-    bottom: 0;
-}
+#letterbox-top { top: 0; }
+#letterbox-bottom { bottom: 0; }
 
 .cinematic .letterbox {
-    height: 12%; /* Cinematic aspect ratio */
+    height: 12%;
 }
 
 #dialogue-container {
     position: absolute;
-    bottom: 15%; /* Positioned lower */
+    bottom: 15%;
     width: 100%;
     display: flex;
     justify-content: center;
     z-index: 30;
-    transition: opacity 0.5s;
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+#dialogue-container.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
 }
 
 #dialogue-box {
-    background: white;
-    border: 2px solid #333;
-    border-radius: 15px;
-    padding: 20px 40px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    border: none;
+    border-radius: 20px 20px 20px 0; /* Modern speech bubble shape */
+    padding: 30px 50px;
     width: 60%;
     max-width: 800px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
     position: relative;
     pointer-events: auto;
+    border-left: 5px solid #222;
 }
 
 #dialogue-name {
     position: absolute;
-    top: -15px;
-    left: 20px;
-    background: #333;
+    top: -20px;
+    left: 0;
+    background: #222;
     color: white;
-    padding: 5px 15px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-radius: 10px 10px 10px 0;
+    font-weight: 900;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 #dialogue-text {
-    color: black;
-    font-size: 1.2rem;
-    line-height: 1.5;
+    color: #333;
+    font-size: 1.5rem;
+    line-height: 1.4;
     margin: 0;
     font-weight: 500;
 }
@@ -131,15 +164,51 @@ button:hover {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    color: #333;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 15px;
+    color: #222;
     font-size: 0.9rem;
     pointer-events: auto;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transform: translateX(-150%); /* Start hidden offscreen */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.hidden {
-    opacity: 0;
-    pointer-events: none;
+#controls-info:not(.hidden) {
+    transform: translateX(0);
+}
+
+#controls-info h3 {
+    margin-top: 0;
+    font-weight: 900;
+    text-transform: uppercase;
+    border-bottom: 2px solid #222;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+#controls-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#controls-info li {
+    margin-bottom: 8px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+}
+
+.key {
+    background: #222;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    margin-right: 10px;
 }

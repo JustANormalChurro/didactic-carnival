@@ -59,6 +59,11 @@ class Game {
         this.autoMoveStartPos = this.character.mesh.position.clone();
     }
 
+    // Easing function
+    easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
     characterAction(name) {
         // Trigger specific action state (simple override for now)
         // In a complex system, we'd inject this into the input or character state
@@ -88,8 +93,12 @@ class Game {
             // Auto Move
             if (this.autoMoveTarget) {
                 this.autoMoveTimer += delta;
-                const t = Math.min(this.autoMoveTimer / this.autoMoveDuration, 1);
-                this.character.mesh.position.lerpVectors(this.autoMoveStartPos, this.autoMoveTarget, t);
+                let t = Math.min(this.autoMoveTimer / this.autoMoveDuration, 1);
+
+                // Apply Easing
+                const easedT = this.easeInOutQuad(t);
+
+                this.character.mesh.position.lerpVectors(this.autoMoveStartPos, this.autoMoveTarget, easedT);
 
                 // Face target
                 const lookPos = this.autoMoveTarget.clone();
@@ -97,8 +106,10 @@ class Game {
                 this.character.mesh.lookAt(lookPos);
 
                 // Animate legs
-                if (t < 1) this.character.animate('WALK', this.clock.getElapsedTime(), delta);
-                else {
+                if (t < 1) {
+                    const isSprinting = this.autoMoveDuration < 1.0; // Heuristic
+                    this.character.animate(isSprinting ? 'RUN' : 'WALK', this.clock.getElapsedTime(), delta);
+                } else {
                     this.character.animate('IDLE', this.clock.getElapsedTime(), delta);
                     this.autoMoveTarget = null;
                 }
@@ -201,15 +212,36 @@ class Game {
                 this.character.onGround = true;
             }
 
-            // Box Interaction (Kick)
-            if (this.input.isPressed('kick')) {
-                const dist = this.character.mesh.position.distanceTo(this.world.kickableBox.position);
-                if (dist < 2) {
-                    // Apply force to box
-                    const kickDir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.character.mesh.quaternion);
-                    this.world.boxVelocity.addScaledVector(kickDir, 10);
-                    this.world.boxVelocity.y += 5;
-                    this.audio.playImpactSound();
+            // Box/Object Interaction (Kick/Punch)
+            if (this.input.isPressed('kick') || this.input.isPressed('punch')) {
+                const range = 3;
+                const force = this.input.isPressed('kick') ? 50 : 30; // Massive force
+
+                // Check simple distance to center of character
+                // A better way would be a cone check in front, but distance + facing is okay for now
+
+                // We will apply an "Explosion" of force from the character's position forward
+                const impactPos = this.character.mesh.position.clone().add(
+                    new THREE.Vector3(0, 0, 1).applyQuaternion(this.character.mesh.quaternion).multiplyScalar(1)
+                );
+
+                // Throttle this so it doesn't apply every frame (Input is continuous)
+                if (!this.actionCooldown) {
+                     this.world.applyExplosionForce(impactPos, force, range);
+                     this.audio.playImpactSound();
+                     this.actionCooldown = 0.5; // Seconds
+                }
+            }
+
+            if (this.actionCooldown > 0) this.actionCooldown -= delta;
+
+            // Player Collision with Objects (Simple Push)
+            for (const obj of this.world.physicsObjects) {
+                const dist = this.character.mesh.position.distanceTo(obj.mesh.position);
+                const minDist = 0.5 + obj.radius;
+                if (dist < minDist) {
+                    const pushDir = new THREE.Vector3().subVectors(obj.mesh.position, this.character.mesh.position).normalize();
+                    obj.velocity.addScaledVector(pushDir, 10 * delta); // Push object
                 }
             }
 
@@ -236,7 +268,7 @@ class Game {
         }
 
         // Update World Physics
-        this.world.updateBoxPhysics(delta);
+        this.world.updatePhysics(delta);
 
         this.world.render();
     }

@@ -76,47 +76,93 @@ export class World {
         this.boxOnGround = true;
 
         // Scattered colorful objects
-        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
-        for (let i = 0; i < 20; i++) {
+        this.physicsObjects = []; // Store all interactable objects
+
+        // Add the main kickable box to physics objects
+        this.physicsObjects.push({
+            mesh: this.kickableBox,
+            velocity: new THREE.Vector3(),
+            mass: 1.0,
+            radius: 0.7 // Approx collision radius
+        });
+
+        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff, 0xffaa00, 0x00aaff];
+        for (let i = 0; i < 50; i++) {
             const size = 0.5 + Math.random() * 0.5;
             const geometry = Math.random() > 0.5 ?
                 new THREE.BoxGeometry(size, size, size) :
                 new THREE.SphereGeometry(size / 2, 32, 32);
 
             const material = new THREE.MeshStandardMaterial({
-                color: colors[Math.floor(Math.random() * colors.length)]
+                color: colors[Math.floor(Math.random() * colors.length)],
+                roughness: 0.2,
+                metalness: 0.3
             });
 
             const mesh = new THREE.Mesh(geometry, material);
-            const x = (Math.random() - 0.5) * 40;
-            const z = (Math.random() - 0.5) * 40;
+            const x = (Math.random() - 0.5) * 80; // Widen area
+            const z = (Math.random() - 0.5) * 80;
 
-            // Avoid center area
-            if (Math.abs(x) < 5 && Math.abs(z) < 5) continue;
+            // Avoid center area (Start) and Box area
+            if (Math.abs(x) < 5 && Math.abs(z) < 5) continue; // Center
+            if (Math.abs(x - 5) < 3 && Math.abs(z) < 3) continue; // Box area
 
             mesh.position.set(x, size/2, z);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             this.scene.add(mesh);
+
+            // Add to physics
+            this.physicsObjects.push({
+                mesh: mesh,
+                velocity: new THREE.Vector3(),
+                mass: size, // Larger is heavier
+                radius: size / 1.5
+            });
         }
     }
 
-    updateBoxPhysics(delta) {
-        // Simple friction
-        this.boxVelocity.x *= 0.95;
-        this.boxVelocity.z *= 0.95;
-        this.boxVelocity.y -= 9.8 * delta; // Gravity
+    applyExplosionForce(center, force, radius) {
+        for (const obj of this.physicsObjects) {
+            const dist = center.distanceTo(obj.mesh.position);
+            if (dist < radius) {
+                const direction = new THREE.Vector3().subVectors(obj.mesh.position, center).normalize();
+                direction.y += 0.5; // Lift up
+                direction.normalize();
 
-        // Move
-        this.kickableBox.position.addScaledVector(this.boxVelocity, delta);
+                // Inverse square law ish
+                const power = force * (1 - dist / radius) / obj.mass;
+                obj.velocity.addScaledVector(direction, power);
+            }
+        }
+    }
 
-        // Ground collision
-        if (this.kickableBox.position.y < 0.5) {
-            this.kickableBox.position.y = 0.5;
-            this.boxVelocity.y = 0;
-            this.boxOnGround = true;
-        } else {
-            this.boxOnGround = false;
+    updatePhysics(delta) {
+        for (const obj of this.physicsObjects) {
+            // Gravity
+            obj.velocity.y -= 20 * delta;
+
+            // Friction
+            obj.velocity.x *= 0.98;
+            obj.velocity.z *= 0.98;
+
+            // Apply Velocity
+            obj.mesh.position.addScaledVector(obj.velocity, delta);
+
+            // Floor Collision
+            const halfSize = obj.radius; // approx
+            if (obj.mesh.position.y < halfSize) {
+                obj.mesh.position.y = halfSize;
+                obj.velocity.y *= -0.5; // Bounce
+                if (Math.abs(obj.velocity.y) < 1) obj.velocity.y = 0;
+            }
+
+            // Wall boundaries (Void limits)
+            const limit = 45;
+            if (obj.mesh.position.x > limit) { obj.mesh.position.x = limit; obj.velocity.x *= -0.8; }
+            if (obj.mesh.position.x < -limit) { obj.mesh.position.x = -limit; obj.velocity.x *= -0.8; }
+            if (obj.mesh.position.z > limit) { obj.mesh.position.z = limit; obj.velocity.z *= -0.8; }
+            if (obj.mesh.position.z < -limit) { obj.mesh.position.z = -limit; obj.velocity.z *= -0.8; }
         }
     }
 
