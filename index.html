@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Void Training Program</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <div id="letterbox-top" class="letterbox"></div>
+        <div id="letterbox-bottom" class="letterbox"></div>
+
+        <div id="start-screen">
+            <h1>The Void Training Program</h1>
+            <button id="start-btn">Start Cutscene</button>
+        </div>
+
+        <div id="dialogue-container" class="hidden">
+            <div id="dialogue-box">
+                <p id="dialogue-text"></p>
+                <div id="dialogue-name">Proto</div>
+            </div>
+        </div>
+
+        <div id="controls-info" class="hidden">
+            <h3>Controls</h3>
+            <ul>
+                <li>WASD: Move</li>
+                <li>SPACE: Jump</li>
+                <li>SHIFT: Sprint</li>
+                <li>F: Kick</li>
+                <li>G: Punch</li>
+                <li>C: Toggle Camera</li>
+                <li>R: Reset</li>
+                <li>1: Wave</li>
+                <li>2: Dance</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
